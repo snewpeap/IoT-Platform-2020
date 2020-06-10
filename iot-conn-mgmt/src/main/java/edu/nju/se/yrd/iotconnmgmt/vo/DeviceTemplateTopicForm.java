@@ -9,6 +9,7 @@ public class DeviceTemplateTopicForm {
     private String description;
     private Boolean upstream;
     private Boolean downstream;
+    private String protocol;
 
     public Long getDeviceTemplateId() {
         return deviceTemplateId;
@@ -50,6 +51,15 @@ public class DeviceTemplateTopicForm {
         this.downstream = downstream;
     }
 
+    public String getProtocol() {
+        return protocol;
+    }
+
+    public void setProtocol(String protocol) {
+        this.protocol = protocol;
+    }
+
+    /* 转换后的Entity没有处理protocol信息，需要在后续处理 */
     public DeviceTemplateTopic convertToEntity() {
         DeviceTemplate deviceTemplate = new DeviceTemplate(deviceTemplateId, deviceTemplateId.toString());
         return new DeviceTemplateTopic(deviceTemplate, name, description, upstream, downstream);

@@ -9,6 +9,8 @@ public class DeviceTopicForm {
     private String description;
     private Boolean upstream;
     private Boolean downstream;
+    private String protocol;
+    private Long templateTopicId;
 
     public Long getDeviceId() {
         return deviceId;
@@ -50,6 +52,23 @@ public class DeviceTopicForm {
         this.downstream = downstream;
     }
 
+    public String getProtocol() {
+        return protocol;
+    }
+
+    public void setProtocol(String protocol) {
+        this.protocol = protocol;
+    }
+
+    public Long getTemplateTopicId() {
+        return templateTopicId;
+    }
+
+    public void setTemplateTopicId(Long templateTopicId) {
+        this.templateTopicId = templateTopicId;
+    }
+
+    /* 转换后的Entity没有处理protocol和parent信息，需要在后续处理 */
     public DeviceTopic convertToEntity() {
         Device device = new Device(deviceId, deviceId.toString());
         return new DeviceTopic(device, name, description, upstream, downstream);

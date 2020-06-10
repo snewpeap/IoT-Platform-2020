@@ -3,6 +3,7 @@ package edu.nju.se.yrd.iotconnmgmt.entity;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 
 @Entity
 public class DeviceTopic {
@@ -14,6 +15,10 @@ public class DeviceTopic {
     private String description;
     private Boolean upstream;
     private Boolean downstream;
+    @ManyToOne
+    private Protocol protocol;
+    @ManyToOne
+    private DeviceTemplateTopic parent;
 
     public DeviceTopic(Device host, String name, String description, Boolean upstream, Boolean downstream) {
         this.host = host;
@@ -73,5 +78,21 @@ public class DeviceTopic {
 
     public void setDownstream(Boolean downstream) {
         this.downstream = downstream;
+    }
+
+    public Protocol getProtocol() {
+        return protocol;
+    }
+
+    public void setProtocol(Protocol protocol) {
+        this.protocol = protocol;
+    }
+
+    public DeviceTemplateTopic getParent() {
+        return parent;
+    }
+
+    public void setParent(DeviceTemplateTopic parent) {
+        this.parent = parent;
     }
 }

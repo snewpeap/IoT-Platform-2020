@@ -3,6 +3,7 @@ package edu.nju.se.yrd.iotconnmgmt.controller;
 import edu.nju.se.yrd.iotconnmgmt.vo.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -40,15 +41,23 @@ public class ApiController {
         return null;
     }
 
-    @PostMapping("/{topicId}/message")
+    @PostMapping("device/{topicId}/message")
     public CarryPayloadResponse<String> manuallySendMessage(@PathVariable Long topicId, @RequestParam Boolean async, @RequestBody String message) {
         return null;
     }
 
-    @GetMapping("/{topicId}/message")
+    @GetMapping("device/{topicId}/message")
     public CarryPayloadResponse<List<MessageVO>> getMessages(@PathVariable Long topicId) {
         return null;
     }
 
-    //TODO SDK上传
+    @GetMapping("/protocol")
+    public CarryPayloadResponse<List<String>> getProtocols() {
+        return null;
+    }
+
+    @PostMapping("/protocol")
+    public BasicResponse uploadProtocol(@RequestParam MultipartFile file) {
+        return null;
+    }
 }

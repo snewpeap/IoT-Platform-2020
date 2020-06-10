@@ -11,6 +11,9 @@ public class MessageVO {
     private String direction;
     private String status;
 
+    public MessageVO() {
+    }
+
     public MessageVO(String id, Date time, String content, String direction, String status) {
         this.id = id;
         this.time = time;

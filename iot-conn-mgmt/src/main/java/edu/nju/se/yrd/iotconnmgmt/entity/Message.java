@@ -12,7 +12,7 @@ public class Message {
     @ManyToOne(optional = false)
     private DeviceTopic topic;
     @Enumerated
-    private Direction direction;
+    private DIRECTION direction;
     @Enumerated
     private STATUS status;
 
@@ -48,11 +48,11 @@ public class Message {
         this.topic = topic;
     }
 
-    public Direction getDirection() {
+    public DIRECTION getDirection() {
         return direction;
     }
 
-    public void setDirection(Direction direction) {
+    public void setDirection(DIRECTION direction) {
         this.direction = direction;
     }
 
@@ -64,7 +64,7 @@ public class Message {
         this.status = status;
     }
 
-    public enum Direction {
+    public enum DIRECTION {
         UPSTREAM, DOWNSTREAM;
     }
 
