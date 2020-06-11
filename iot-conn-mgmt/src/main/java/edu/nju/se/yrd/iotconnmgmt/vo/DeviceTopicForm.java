@@ -4,11 +4,11 @@ import edu.nju.se.yrd.iotconnmgmt.entity.Device;
 import edu.nju.se.yrd.iotconnmgmt.entity.DeviceTopic;
 
 public class DeviceTopicForm {
-    private Long deviceId;
+    private Long deviceId;//TODO String
     private String name;
     private String description;
-    private Boolean upstream;
-    private Boolean downstream;
+    private Boolean outbound;
+    private Boolean inbound;
     private String protocol;
     private Long templateTopicId;
 
@@ -36,20 +36,20 @@ public class DeviceTopicForm {
         this.description = description;
     }
 
-    public Boolean getUpstream() {
-        return upstream;
+    public Boolean getOutbound() {
+        return outbound;
     }
 
-    public void setUpstream(Boolean upstream) {
-        this.upstream = upstream;
+    public void setOutbound(Boolean outbound) {
+        this.outbound = outbound;
     }
 
-    public Boolean getDownstream() {
-        return downstream;
+    public Boolean getInbound() {
+        return inbound;
     }
 
-    public void setDownstream(Boolean downstream) {
-        this.downstream = downstream;
+    public void setInbound(Boolean inbound) {
+        this.inbound = inbound;
     }
 
     public String getProtocol() {
@@ -71,6 +71,6 @@ public class DeviceTopicForm {
     /* 转换后的Entity没有处理protocol和parent信息，需要在后续处理 */
     public DeviceTopic convertToEntity() {
         Device device = new Device(deviceId, deviceId.toString());
-        return new DeviceTopic(device, name, description, upstream, downstream);
+        return new DeviceTopic(device, name, description, outbound, inbound);
     }
 }

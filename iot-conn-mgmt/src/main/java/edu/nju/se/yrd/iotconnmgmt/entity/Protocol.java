@@ -4,14 +4,13 @@ import edu.nju.se.yrd.iotconnmgmt.protocol.IProtocol;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import java.net.URL;
 
 @Entity
 public class Protocol {
     @Id
     private String name;
     private Class<IProtocol> implement;
-    private URL jarFile;
+    private String jarFile;
 
     public String getName() {
         return name;
@@ -29,11 +28,11 @@ public class Protocol {
         this.implement = implement;
     }
 
-    public URL getJarFile() {
+    public String getJarFile() {
         return jarFile;
     }
 
-    public void setJarFile(URL jarFile) {
+    public void setJarFile(String jarFile) {
         this.jarFile = jarFile;
     }
 }

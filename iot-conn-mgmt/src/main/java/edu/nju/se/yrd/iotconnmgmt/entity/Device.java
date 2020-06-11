@@ -4,7 +4,7 @@ import javax.persistence.Embeddable;
 
 @Embeddable
 public class Device {
-    private Long id;
+    private Long id;//TODO String
     private String name;
     private boolean online;
 

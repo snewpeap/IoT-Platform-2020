@@ -15,7 +15,7 @@ public interface DeviceTemplateTopicService {
      * @param deviceTemplateId 设备模板在平台上的Id
      * @return 包含模板Topic列表的Response
      */
-    CarryPayloadResponse<List<DeviceTemplateTopicVO>> getTopics(Long deviceTemplateId);
+    CarryPayloadResponse<List<DeviceTemplateTopicVO>> getTopics(String deviceTemplateId);
 
     /**
      * 为设备模板增加一个模板Topic

@@ -2,20 +2,29 @@ package edu.nju.se.yrd.iotconnmgmt.vo;
 
 import edu.nju.se.yrd.iotconnmgmt.entity.DeviceTemplate;
 import edu.nju.se.yrd.iotconnmgmt.entity.DeviceTemplateTopic;
+import edu.nju.se.yrd.iotconnmgmt.util.TopicType;
+
+import javax.validation.constraints.NotNull;
 
 public class DeviceTemplateTopicForm {
-    private Long deviceTemplateId;
+    @NotNull
+    private String deviceTemplateId;
+    @TopicType
     private String name;
+    @NotNull(message = "Topic描述不能为空")
     private String description;
-    private Boolean upstream;
-    private Boolean downstream;
+    @NotNull(message = "出向标识不能为空")
+    private Boolean outbound;
+    @NotNull(message = "入向标识不能为空")
+    private Boolean inbound;
+    @NotNull(message = "协议不能为空")
     private String protocol;
 
-    public Long getDeviceTemplateId() {
+    public String getDeviceTemplateId() {
         return deviceTemplateId;
     }
 
-    public void setDeviceTemplateId(Long deviceTemplateId) {
+    public void setDeviceTemplateId(String deviceTemplateId) {
         this.deviceTemplateId = deviceTemplateId;
     }
 
@@ -35,20 +44,20 @@ public class DeviceTemplateTopicForm {
         this.description = description;
     }
 
-    public Boolean getUpstream() {
-        return upstream;
+    public Boolean getOutbound() {
+        return outbound;
     }
 
-    public void setUpstream(Boolean upstream) {
-        this.upstream = upstream;
+    public void setOutbound(Boolean outbound) {
+        this.outbound = outbound;
     }
 
-    public Boolean getDownstream() {
-        return downstream;
+    public Boolean getInbound() {
+        return inbound;
     }
 
-    public void setDownstream(Boolean downstream) {
-        this.downstream = downstream;
+    public void setInbound(Boolean inbound) {
+        this.inbound = inbound;
     }
 
     public String getProtocol() {
@@ -61,7 +70,7 @@ public class DeviceTemplateTopicForm {
 
     /* 转换后的Entity没有处理protocol信息，需要在后续处理 */
     public DeviceTemplateTopic convertToEntity() {
-        DeviceTemplate deviceTemplate = new DeviceTemplate(deviceTemplateId, deviceTemplateId.toString());
-        return new DeviceTemplateTopic(deviceTemplate, name, description, upstream, downstream);
+        DeviceTemplate deviceTemplate = new DeviceTemplate(deviceTemplateId, deviceTemplateId);
+        return new DeviceTemplateTopic(deviceTemplate, name, description, outbound, inbound);
     }
 }

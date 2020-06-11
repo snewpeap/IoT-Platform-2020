@@ -2,21 +2,23 @@ package edu.nju.se.yrd.iotconnmgmt.vo;
 
 import edu.nju.se.yrd.iotconnmgmt.entity.DeviceTopic;
 
+import java.util.StringJoiner;
+
 public class DeviceTopicVO {
     private Long id;
     private String deviceTemplateName;
     private String name;
     private String description;
-    private Boolean upstream;
-    private Boolean downstream;
+    private Boolean outbound;
+    private Boolean inbound;
 
-    public DeviceTopicVO(Long id, String deviceTemplateName, String name, String description, Boolean upstream, Boolean downstream) {
+    public DeviceTopicVO(Long id, String deviceTemplateName, String name, String description, Boolean outbound, Boolean inbound) {
         this.id = id;
         this.deviceTemplateName = deviceTemplateName;
         this.name = name;
         this.description = description;
-        this.upstream = upstream;
-        this.downstream = downstream;
+        this.outbound = outbound;
+        this.inbound = inbound;
     }
 
     public DeviceTopicVO() {
@@ -29,8 +31,8 @@ public class DeviceTopicVO {
                 entity.getHost().getName(),
                 entity.getName(),
                 entity.getDescription(),
-                entity.getUpstream(),
-                entity.getDownstream()
+                entity.getOutbound(),
+                entity.getInbound()
         );
     }
 
@@ -66,19 +68,31 @@ public class DeviceTopicVO {
         this.description = description;
     }
 
-    public Boolean getUpstream() {
-        return upstream;
+    public Boolean getOutbound() {
+        return outbound;
     }
 
-    public void setUpstream(Boolean upstream) {
-        this.upstream = upstream;
+    public void setOutbound(Boolean outbound) {
+        this.outbound = outbound;
     }
 
-    public Boolean getDownstream() {
-        return downstream;
+    public Boolean getInbound() {
+        return inbound;
     }
 
-    public void setDownstream(Boolean downstream) {
-        this.downstream = downstream;
+    public void setInbound(Boolean inbound) {
+        this.inbound = inbound;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", DeviceTopicVO.class.getSimpleName() + "[", "]")
+                .add("id=" + id)
+                .add("deviceTemplateName='" + deviceTemplateName + "'")
+                .add("name='" + name + "'")
+                .add("description='" + description + "'")
+                .add("outbound=" + outbound)
+                .add("inbound=" + inbound)
+                .toString();
     }
 }

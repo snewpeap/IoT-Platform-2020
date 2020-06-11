@@ -4,23 +4,23 @@ import javax.persistence.Embeddable;
 
 @Embeddable
 public class DeviceTemplate {
-    private Long id;
+    private String id;
     private String name;
 
     public DeviceTemplate() {
-        this(0L, "");
+        this("", "");
     }
 
-    public DeviceTemplate(Long id, String name) {
+    public DeviceTemplate(String id, String name) {
         this.id = id;
         this.name = name;
     }
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 

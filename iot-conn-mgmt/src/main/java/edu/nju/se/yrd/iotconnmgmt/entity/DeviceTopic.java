@@ -13,19 +13,19 @@ public class DeviceTopic {
     private Device host;
     private String name;
     private String description;
-    private Boolean upstream;
-    private Boolean downstream;
+    private Boolean outbound;
+    private Boolean inbound;
     @ManyToOne
     private Protocol protocol;
     @ManyToOne
     private DeviceTemplateTopic parent;
 
-    public DeviceTopic(Device host, String name, String description, Boolean upstream, Boolean downstream) {
+    public DeviceTopic(Device host, String name, String description, Boolean outbound, Boolean inbound) {
         this.host = host;
         this.name = name;
         this.description = description;
-        this.upstream = upstream;
-        this.downstream = downstream;
+        this.outbound = outbound;
+        this.inbound = inbound;
     }
 
     public DeviceTopic() {
@@ -64,20 +64,20 @@ public class DeviceTopic {
         this.description = description;
     }
 
-    public Boolean getUpstream() {
-        return upstream;
+    public Boolean getOutbound() {
+        return outbound;
     }
 
-    public void setUpstream(Boolean upstream) {
-        this.upstream = upstream;
+    public void setOutbound(Boolean outbound) {
+        this.outbound = outbound;
     }
 
-    public Boolean getDownstream() {
-        return downstream;
+    public Boolean getInbound() {
+        return inbound;
     }
 
-    public void setDownstream(Boolean downstream) {
-        this.downstream = downstream;
+    public void setInbound(Boolean inbound) {
+        this.inbound = inbound;
     }
 
     public Protocol getProtocol() {
