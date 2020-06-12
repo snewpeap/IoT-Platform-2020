@@ -2,21 +2,29 @@ package edu.nju.se.yrd.iotconnmgmt.vo;
 
 import edu.nju.se.yrd.iotconnmgmt.entity.Device;
 import edu.nju.se.yrd.iotconnmgmt.entity.DeviceTopic;
+import edu.nju.se.yrd.iotconnmgmt.util.TopicType;
+
+import javax.validation.constraints.NotNull;
 
 public class DeviceTopicForm {
-    private Long deviceId;//TODO String
+    @NotNull(message = "设备ID不能为空")
+    private String deviceId;
+    @TopicType
     private String name;
+    @NotNull(message = "Topic描述不能为空")
     private String description;
+    @NotNull(message = "出向标识不能为空")
     private Boolean outbound;
+    @NotNull(message = "入向标识不能为空")
     private Boolean inbound;
+    @NotNull(message = "协议不能为空")
     private String protocol;
-    private Long templateTopicId;
 
-    public Long getDeviceId() {
+    public String getDeviceId() {
         return deviceId;
     }
 
-    public void setDeviceId(Long deviceId) {
+    public void setDeviceId(String deviceId) {
         this.deviceId = deviceId;
     }
 
@@ -60,17 +68,9 @@ public class DeviceTopicForm {
         this.protocol = protocol;
     }
 
-    public Long getTemplateTopicId() {
-        return templateTopicId;
-    }
-
-    public void setTemplateTopicId(Long templateTopicId) {
-        this.templateTopicId = templateTopicId;
-    }
-
     /* 转换后的Entity没有处理protocol和parent信息，需要在后续处理 */
     public DeviceTopic convertToEntity() {
-        Device device = new Device(deviceId, deviceId.toString());
+        Device device = new Device(deviceId, deviceId);
         return new DeviceTopic(device, name, description, outbound, inbound);
     }
 }

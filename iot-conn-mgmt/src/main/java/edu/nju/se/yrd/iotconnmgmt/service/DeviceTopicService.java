@@ -13,7 +13,7 @@ public interface DeviceTopicService {
      * @param deviceId 设备在平台上的Id
      * @return 包含Topic列表的Response
      */
-    CarryPayloadResponse<List<DeviceTemplateTopicVO>> getTopics(Long deviceId);
+    CarryPayloadResponse<List<DeviceTopicVO>> getTopics(String deviceId);
 
     /**
      * 为设备增加一个Topic

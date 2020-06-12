@@ -6,6 +6,7 @@ import edu.nju.se.yrd.iotconnmgmt.vo.DeviceTemplateTopicForm;
 import edu.nju.se.yrd.iotconnmgmt.vo.DeviceTemplateTopicVO;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface DeviceTemplateTopicService {
 
@@ -32,4 +33,5 @@ public interface DeviceTemplateTopicService {
      * @return 删除模板Topic的结果
      */
     BasicResponse removeTopic(Long topicId);
+
 }

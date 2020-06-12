@@ -9,7 +9,7 @@ public class Message {
     private String id;
     private Long timestamp;
     private String content;
-    @ManyToOne(optional = false)
+    @ManyToOne
     private DeviceTopic topic;
     @Enumerated
     private DIRECTION direction;

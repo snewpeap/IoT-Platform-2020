@@ -15,6 +15,15 @@ public interface DeviceTemplateTopicRepository extends JpaRepository<DeviceTempl
      */
     List<DeviceTemplateTopic> getByHost_Id(String deviceTemplateId);
 
+
+    /**
+     * 通过设备模板Id获取某一个（头一个）模板Topic
+     *
+     * @param host_id 设备模板Id
+     * @return 这个设备模板的某一个（头一个）模板Topic
+     */
+    Optional<DeviceTemplateTopic> getFirstByHost_Id(String host_id);
+
     /**
      * 查询是否存在同名的模板Topic
      *

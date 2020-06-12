@@ -1,10 +1,12 @@
 package edu.nju.se.yrd.iotconnmgmt.serviceImpl;
 
 import edu.nju.se.yrd.iotconnmgmt.entity.DeviceTemplateTopic;
+import edu.nju.se.yrd.iotconnmgmt.entity.DeviceTopic;
 import edu.nju.se.yrd.iotconnmgmt.entity.Protocol;
 import edu.nju.se.yrd.iotconnmgmt.repository.DeviceTemplateTopicRepository;
 import edu.nju.se.yrd.iotconnmgmt.repository.ProtocolRepository;
 import edu.nju.se.yrd.iotconnmgmt.service.DeviceTemplateTopicService;
+import edu.nju.se.yrd.iotconnmgmt.util.TopicTool;
 import edu.nju.se.yrd.iotconnmgmt.util.TopicValidator;
 import edu.nju.se.yrd.iotconnmgmt.vo.BasicResponse;
 import edu.nju.se.yrd.iotconnmgmt.vo.CarryPayloadResponse;
@@ -33,50 +35,52 @@ public class DeviceTemplateTopicServiceImpl implements DeviceTemplateTopicServic
     @Override
     public CarryPayloadResponse<List<DeviceTemplateTopicVO>> getTopics(String deviceTemplateId) {
         Assert.notNull(deviceTemplateId, "设备模板ID不能为空");
-        List<DeviceTemplateTopic> deviceTemplateTopics = deviceTemplateTopicRepository.getByHost_Id(deviceTemplateId);
         List<DeviceTemplateTopicVO> payload = new LinkedList<>();
-        deviceTemplateTopics.forEach(entity -> payload.add(DeviceTemplateTopicVO.convertFromEntity(entity)));
+        deviceTemplateTopicRepository.getByHost_Id(deviceTemplateId).forEach(entity -> payload.add(DeviceTemplateTopicVO.convertFromEntity(entity)));
         return CarryPayloadResponse.ok(payload);
     }
 
     @Override
     public BasicResponse addTopic(DeviceTemplateTopicForm form) {
         Assert.notNull(form, "表单为空");
+        //没有使用@Valid，而在这里进行validation
+        //主要是因为测试用例写好后才发现测试里@Valid不生效
+        //这样不也挺好吗
         Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
         Set<ConstraintViolation<DeviceTemplateTopicForm>> validate = validator.validate(form);
-        BasicResponse response;
 
-        String topic;
+        BasicResponse response;
+        String topic = "";
         Optional<Protocol> optionalProtocol = Optional.empty();
         StringJoiner messageJoiner = new StringJoiner("\n");
         if (validate.isEmpty()) {
-            if (!form.getInbound() && !form.getOutbound()) {
-                messageJoiner.add("至少选择一个通信方向");
-            } else if (form.getOutbound()) {
-                try {
-                    TopicValidator.isValid(form.getName(), false);
-                } catch (Exception e) {
-                    messageJoiner.add("出向不允许使用通配符");
-                }
-            }
+            TopicValidator.isValid(form.getName(), form.getInbound(), form.getOutbound(), messageJoiner);
 
             optionalProtocol = protocolRepository.findByName(form.getProtocol());
-            if (optionalProtocol.isPresent()) {
-                topic = "/" + form.getDeviceTemplateId() + "/${deviceName}/user" + form.getName();
+            if (!optionalProtocol.isPresent()) {
+                messageJoiner.add("协议不存在");
+            }
+
+            Optional<DeviceTemplateTopic> checkHost = deviceTemplateTopicRepository.getFirstByHost_Id(form.getDeviceTemplateId());
+            if (!checkHost.isPresent()) {
+                messageJoiner.add("不存在的设备模板");
+            } else {
+                topic = TopicTool.generateNameFromUserInput(form.getName(), form.getDeviceTemplateId());
                 if (deviceTemplateTopicRepository.existsByName(topic)) {
                     messageJoiner.add("已经存在的模板Topic");
                 }
-            } else {
-                messageJoiner.add("协议不存在");
             }
         } else {
+            //validation检测出不符合条件的字段，一股脑加进错误信息里
             validate.stream().map(ConstraintViolation::getMessage).forEach(messageJoiner::add);
         }
 
         if (messageJoiner.length() == 0) {
             DeviceTemplateTopic deviceTemplateTopic = form.convertToEntity();
+            deviceTemplateTopic.setName(topic);
             optionalProtocol.ifPresent(deviceTemplateTopic::setProtocol);
             deviceTemplateTopicRepository.save(deviceTemplateTopic);
+            //TODO 异步进行所有设备的子Topic添加
             response = BasicResponse.ok();
         } else {
             response = BasicResponse.error().message(messageJoiner.toString());

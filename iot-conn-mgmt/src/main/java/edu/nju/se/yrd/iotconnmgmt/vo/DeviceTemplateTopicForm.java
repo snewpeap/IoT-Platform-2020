@@ -7,7 +7,7 @@ import edu.nju.se.yrd.iotconnmgmt.util.TopicType;
 import javax.validation.constraints.NotNull;
 
 public class DeviceTemplateTopicForm {
-    @NotNull
+    @NotNull(message = "设备模板ID不能为空")
     private String deviceTemplateId;
     @TopicType
     private String name;

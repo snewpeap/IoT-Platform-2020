@@ -4,25 +4,29 @@ import javax.persistence.Embeddable;
 
 @Embeddable
 public class Device {
-    private Long id;//TODO String
+    private String id;
     private String name;
-    private boolean online;
+    private DeviceTemplate template;
 
     public Device() {
-        this(0L, "");
+        this("", "");
     }
 
-    public Device(Long id, String name) {
+    public Device(String id, String name) {
+        this(id, name, new DeviceTemplate());
+    }
+
+    public Device(String id, String name, DeviceTemplate template) {
         this.id = id;
         this.name = name;
-        online = false;
+        this.template = template;
     }
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -34,11 +38,11 @@ public class Device {
         this.name = name;
     }
 
-    public boolean isOnline() {
-        return online;
+    public DeviceTemplate getTemplate() {
+        return template;
     }
 
-    public void setOnline(boolean online) {
-        this.online = online;
+    public void setTemplate(DeviceTemplate parent) {
+        this.template = parent;
     }
 }

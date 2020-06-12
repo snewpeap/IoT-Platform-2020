@@ -6,15 +6,15 @@ import java.util.StringJoiner;
 
 public class DeviceTopicVO {
     private Long id;
-    private String deviceTemplateName;
+    private String deviceName;
     private String name;
     private String description;
     private Boolean outbound;
     private Boolean inbound;
 
-    public DeviceTopicVO(Long id, String deviceTemplateName, String name, String description, Boolean outbound, Boolean inbound) {
+    public DeviceTopicVO(Long id, String deviceName, String name, String description, Boolean outbound, Boolean inbound) {
         this.id = id;
-        this.deviceTemplateName = deviceTemplateName;
+        this.deviceName = deviceName;
         this.name = name;
         this.description = description;
         this.outbound = outbound;
@@ -44,12 +44,12 @@ public class DeviceTopicVO {
         this.id = id;
     }
 
-    public String getDeviceTemplateName() {
-        return deviceTemplateName;
+    public String getDeviceName() {
+        return deviceName;
     }
 
-    public void setDeviceTemplateName(String deviceTemplateName) {
-        this.deviceTemplateName = deviceTemplateName;
+    public void setDeviceName(String deviceName) {
+        this.deviceName = deviceName;
     }
 
     public String getName() {
@@ -88,7 +88,7 @@ public class DeviceTopicVO {
     public String toString() {
         return new StringJoiner(", ", DeviceTopicVO.class.getSimpleName() + "[", "]")
                 .add("id=" + id)
-                .add("deviceTemplateName='" + deviceTemplateName + "'")
+                .add("deviceName='" + deviceName + "'")
                 .add("name='" + name + "'")
                 .add("description='" + description + "'")
                 .add("outbound=" + outbound)
