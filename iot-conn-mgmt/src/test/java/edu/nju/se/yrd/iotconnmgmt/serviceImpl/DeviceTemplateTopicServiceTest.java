@@ -1,4 +1,4 @@
-package edu.nju.se.yrd.iotconnmgmt.service;
+package edu.nju.se.yrd.iotconnmgmt.serviceImpl;
 
 import com.github.javafaker.Faker;
 import edu.nju.se.yrd.iotconnmgmt.entity.DeviceTemplate;

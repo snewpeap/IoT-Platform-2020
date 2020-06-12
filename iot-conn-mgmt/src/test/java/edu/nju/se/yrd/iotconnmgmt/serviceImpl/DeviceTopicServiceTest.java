@@ -1,13 +1,14 @@
-package edu.nju.se.yrd.iotconnmgmt.service;
+package edu.nju.se.yrd.iotconnmgmt.serviceImpl;
 
 import com.github.javafaker.Faker;
 import edu.nju.se.yrd.iotconnmgmt.entity.*;
 import edu.nju.se.yrd.iotconnmgmt.protocol.IProtocol;
 import edu.nju.se.yrd.iotconnmgmt.repository.DeviceTopicRepository;
+import edu.nju.se.yrd.iotconnmgmt.repository.MessageRepository;
 import edu.nju.se.yrd.iotconnmgmt.repository.ProtocolRepository;
-import edu.nju.se.yrd.iotconnmgmt.serviceImpl.DeviceTopicServiceImpl;
 import edu.nju.se.yrd.iotconnmgmt.util.TopicTool;
 import edu.nju.se.yrd.iotconnmgmt.vo.*;
+import org.apache.commons.lang3.RandomUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -25,12 +26,14 @@ class DeviceTopicServiceTest {
     DeviceTopicServiceImpl service;
     DeviceTopicRepository deviceTopicRepository;
     ProtocolRepository protocolRepository;
+    MessageRepository messageRepository;
 
     final Protocol mqtt = new Protocol();
     final DeviceTemplate validDeviceTemplate = new DeviceTemplate(UUID.randomUUID().toString(), "devTemplate");
     final Device validDevice = new Device(UUID.randomUUID().toString(), "dev", validDeviceTemplate);
     final DeviceTemplateTopic validTemplateTopic = new DeviceTemplateTopic();
     List<String> validName = Arrays.asList("/get/error", "/+/error");
+    DeviceTopic dt;
 
     @BeforeEach
     void setUp() {
@@ -46,7 +49,8 @@ class DeviceTopicServiceTest {
         validTemplateTopic.setOutbound(false);
         validTemplateTopic.setProtocol(mqtt);
 
-        DeviceTopic dt = new DeviceTopic();
+        dt = new DeviceTopic();
+        dt.setId(1L);
         dt.setParent(validTemplateTopic);
         dt.setHost(validDevice);
 
@@ -56,8 +60,9 @@ class DeviceTopicServiceTest {
         protocolRepository = mock(ProtocolRepository.class);
         when(protocolRepository.findByName(mqtt.getName())).thenReturn(Optional.of(mqtt));
         when(protocolRepository.findByName(argThat(argument -> !argument.equals(mqtt.getName())))).thenReturn(Optional.empty());
+        messageRepository = mock(MessageRepository.class);
 
-        service = new DeviceTopicServiceImpl(deviceTopicRepository, protocolRepository);
+        service = new DeviceTopicServiceImpl(deviceTopicRepository, protocolRepository, messageRepository);
     }
 
     @Test
@@ -175,6 +180,27 @@ class DeviceTopicServiceTest {
     void sendMessage() {
     }
 
+    @Test
+    void getMessages_valid() {
+        int n = 50;
+        when(messageRepository.getByTopic_IdOrderByTimestampDesc(anyLong())).thenReturn(Collections.emptyList());
+        when(messageRepository.getByTopic_IdOrderByTimestampDesc(eq(dt.getId()))).thenReturn(generateNMsg(n));
+
+        CarryPayloadResponse<List<MessageVO>> response = service.getMessages(dt.getId());
+        assertTrue(response.getSuccess());
+        assertEquals(n, response.getPayload().size());
+        response.getPayload().forEach(System.out::println);
+
+        response = service.getMessages(123L);
+        assertTrue(response.getSuccess());
+        assertEquals(0, response.getPayload().size());
+    }
+
+    @Test
+    void getMessages_invalid() {
+        assertThrows(IllegalArgumentException.class, () -> service.getMessages(null));
+    }
+
     List<DeviceTopic> generateN(int n) {
         List<DeviceTopic> list = new ArrayList<>(n);
         while (list.size() != n) {
@@ -199,5 +225,20 @@ class DeviceTopicServiceTest {
             list.add(dt);
         }
         return list;
+    }
+
+    List<Message> generateNMsg(int n) {
+        List<Message> messages = new ArrayList<>(n);
+        while (messages.size() != n) {
+            Message message = new Message();
+            message.setId(UUID.randomUUID().toString());
+            message.setTimestamp(faker.date().birthday().getTime());
+            message.setContent(faker.shakespeare().hamletQuote());
+            message.setTopic(dt);
+            message.setDirection(Message.DIRECTION.values()[RandomUtils.nextInt(0, 2)]);
+            message.setStatus(Message.STATUS.values()[RandomUtils.nextInt(0, 3)]);
+            messages.add(message);
+        }
+        return messages;
     }
 }

@@ -1,9 +1,10 @@
 package edu.nju.se.yrd.iotconnmgmt.serviceImpl;
 
-import edu.nju.se.yrd.iotconnmgmt.entity.DeviceTemplateTopic;
 import edu.nju.se.yrd.iotconnmgmt.entity.DeviceTopic;
+import edu.nju.se.yrd.iotconnmgmt.entity.Message;
 import edu.nju.se.yrd.iotconnmgmt.entity.Protocol;
 import edu.nju.se.yrd.iotconnmgmt.repository.DeviceTopicRepository;
+import edu.nju.se.yrd.iotconnmgmt.repository.MessageRepository;
 import edu.nju.se.yrd.iotconnmgmt.repository.ProtocolRepository;
 import edu.nju.se.yrd.iotconnmgmt.service.DeviceTopicService;
 import edu.nju.se.yrd.iotconnmgmt.util.TopicTool;
@@ -19,16 +20,20 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 import java.util.*;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 @Service
 public class DeviceTopicServiceImpl implements DeviceTopicService {
     private final DeviceTopicRepository deviceTopicRepository;
     private final ProtocolRepository protocolRepository;
+    private final MessageRepository messageRepository;
 
     @Autowired
-    public DeviceTopicServiceImpl(DeviceTopicRepository deviceTopicRepository, ProtocolRepository protocolRepository) {
+    public DeviceTopicServiceImpl(DeviceTopicRepository deviceTopicRepository, ProtocolRepository protocolRepository,
+                                  MessageRepository messageRepository) {
         this.deviceTopicRepository = deviceTopicRepository;
         this.protocolRepository = protocolRepository;
+        this.messageRepository = messageRepository;
     }
 
     @Override
@@ -99,6 +104,9 @@ public class DeviceTopicServiceImpl implements DeviceTopicService {
 
     @Override
     public CarryPayloadResponse<List<MessageVO>> getMessages(Long topicId) {
-        return null;
+        Assert.notNull(topicId, "TopicID不能为空");
+        return CarryPayloadResponse
+                .ok(messageRepository.getByTopic_IdOrderByTimestampDesc(topicId)
+                        .stream().map(MessageVO::convertFromEntity).collect(Collectors.toList()));
     }
 }

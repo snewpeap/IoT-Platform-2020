@@ -10,7 +10,7 @@ public interface MessageRepository extends JpaRepository<Message, String> {
      * 获得某个Topic的所有消息
      *
      * @param topicId Topic的Id
-     * @return Topic的消息
+     * @return Topic的消息，按时间戳倒序（最新）排序
      */
-    List<Message> getByTopic_Id(Long topicId);
+    List<Message> getByTopic_IdOrderByTimestampDesc(Long topicId);
 }

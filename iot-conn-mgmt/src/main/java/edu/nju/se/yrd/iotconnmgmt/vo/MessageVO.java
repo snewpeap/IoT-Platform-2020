@@ -3,6 +3,7 @@ package edu.nju.se.yrd.iotconnmgmt.vo;
 import edu.nju.se.yrd.iotconnmgmt.entity.Message;
 
 import java.util.Date;
+import java.util.StringJoiner;
 
 public class MessageVO {
     private String id;
@@ -60,6 +61,17 @@ public class MessageVO {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", MessageVO.class.getSimpleName() + "[", "]")
+                .add("id='" + id + "'")
+                .add("time=" + time)
+                .add("content='" + content + "'")
+                .add("direction='" + direction + "'")
+                .add("status='" + status + "'")
+                .toString();
     }
 
     public static MessageVO convertFromEntity(Message entity) {

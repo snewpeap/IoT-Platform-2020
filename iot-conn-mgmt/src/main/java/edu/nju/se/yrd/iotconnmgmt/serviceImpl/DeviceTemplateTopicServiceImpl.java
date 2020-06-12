@@ -1,7 +1,6 @@
 package edu.nju.se.yrd.iotconnmgmt.serviceImpl;
 
 import edu.nju.se.yrd.iotconnmgmt.entity.DeviceTemplateTopic;
-import edu.nju.se.yrd.iotconnmgmt.entity.DeviceTopic;
 import edu.nju.se.yrd.iotconnmgmt.entity.Protocol;
 import edu.nju.se.yrd.iotconnmgmt.repository.DeviceTemplateTopicRepository;
 import edu.nju.se.yrd.iotconnmgmt.repository.ProtocolRepository;
