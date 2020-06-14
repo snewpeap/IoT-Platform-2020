@@ -2,7 +2,6 @@ package edu.nju.se.yrd.iotconnmgmt.serviceImpl;
 
 import com.github.javafaker.Faker;
 import edu.nju.se.yrd.iotconnmgmt.entity.*;
-import edu.nju.se.yrd.iotconnmgmt.protocol.IProtocol;
 import edu.nju.se.yrd.iotconnmgmt.repository.DeviceTopicRepository;
 import edu.nju.se.yrd.iotconnmgmt.repository.MessageRepository;
 import edu.nju.se.yrd.iotconnmgmt.repository.ProtocolRepository;
@@ -38,7 +37,7 @@ class DeviceTopicServiceTest {
     @BeforeEach
     void setUp() {
         mqtt.setName("MQTT");
-        mqtt.setImplement(IProtocol.class);
+        mqtt.setImplement("com.example.MQTT");
         mqtt.setJarFile("mqtt.jar");
 
         validTemplateTopic.setId(1L);
@@ -62,7 +61,8 @@ class DeviceTopicServiceTest {
         when(protocolRepository.findByName(argThat(argument -> !argument.equals(mqtt.getName())))).thenReturn(Optional.empty());
         messageRepository = mock(MessageRepository.class);
 
-        service = new DeviceTopicServiceImpl(deviceTopicRepository, protocolRepository, messageRepository);
+        ProtocolServiceImpl protocolService = mock(ProtocolServiceImpl.class);
+        service = new DeviceTopicServiceImpl(deviceTopicRepository, protocolRepository, messageRepository, protocolService);
     }
 
     @Test

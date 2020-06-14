@@ -1,15 +1,17 @@
 package edu.nju.se.yrd.iotconnmgmt.entity;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 
 @Entity
 public class DeviceTemplateTopic {
     @Id
     @GeneratedValue
     private Long id;
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "id", column = @Column(name = "device_template_id")),
+            @AttributeOverride(name = "name", column = @Column(name = "device_template_name"))
+    })
     private DeviceTemplate host;
     private String name;
     private String description;

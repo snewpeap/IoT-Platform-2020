@@ -1,10 +1,13 @@
 package edu.nju.se.yrd.iotconnmgmt.serviceImpl;
 
+import com.github.javafaker.Faker;
+import edu.nju.se.yrd.iotconnmgmt.entity.DeviceTemplate;
 import edu.nju.se.yrd.iotconnmgmt.entity.DeviceTemplateTopic;
 import edu.nju.se.yrd.iotconnmgmt.entity.Protocol;
 import edu.nju.se.yrd.iotconnmgmt.repository.DeviceTemplateTopicRepository;
 import edu.nju.se.yrd.iotconnmgmt.repository.ProtocolRepository;
 import edu.nju.se.yrd.iotconnmgmt.service.DeviceTemplateTopicService;
+import edu.nju.se.yrd.iotconnmgmt.service.DeviceTopicService;
 import edu.nju.se.yrd.iotconnmgmt.util.TopicTool;
 import edu.nju.se.yrd.iotconnmgmt.util.TopicValidator;
 import edu.nju.se.yrd.iotconnmgmt.vo.BasicResponse;
@@ -15,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
+import javax.annotation.PostConstruct;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
@@ -24,11 +28,39 @@ import java.util.*;
 public class DeviceTemplateTopicServiceImpl implements DeviceTemplateTopicService {
     private final DeviceTemplateTopicRepository deviceTemplateTopicRepository;
     private final ProtocolRepository protocolRepository;
+    private final DeviceTopicService deviceTopicService;
 
     @Autowired
-    public DeviceTemplateTopicServiceImpl(DeviceTemplateTopicRepository deviceTemplateTopicRepository, ProtocolRepository protocolRepository) {
+    public DeviceTemplateTopicServiceImpl(DeviceTemplateTopicRepository deviceTemplateTopicRepository,
+                                          ProtocolRepository protocolRepository,
+                                          DeviceTopicService deviceTopicService) {
         this.deviceTemplateTopicRepository = deviceTemplateTopicRepository;
         this.protocolRepository = protocolRepository;
+        this.deviceTopicService = deviceTopicService;
+    }
+
+    @PostConstruct
+    void postConstruct() {
+        Faker faker = new Faker();
+        DeviceTemplate deviceTemplate = new DeviceTemplate("16ca8851-2d1a-4f8f-a84a-88566dc159dc", "No.1 Product");
+        protocolRepository.findByName("MQTT").ifPresent(protocol -> {
+            for (int i = 0; i < 15; i++) {
+                DeviceTemplateTopic topic = new DeviceTemplateTopic();
+                topic.setName(
+                        String.format(
+                                "/%s/%s",
+                                faker.hacker().verb().replace(" ", ""),
+                                faker.hacker().noun().replace(" ", "")
+                        )
+                );
+                topic.setProtocol(protocol);
+                topic.setInbound(faker.bool().bool());
+                topic.setOutbound(!topic.getInbound() || faker.bool().bool());
+                topic.setHost(deviceTemplate);
+                topic.setDescription(faker.company().bs());
+                deviceTemplateTopicRepository.save(topic);
+            }
+        });
     }
 
     @Override
@@ -79,8 +111,10 @@ public class DeviceTemplateTopicServiceImpl implements DeviceTemplateTopicServic
             deviceTemplateTopic.setName(topic);
             optionalProtocol.ifPresent(deviceTemplateTopic::setProtocol);
             deviceTemplateTopicRepository.save(deviceTemplateTopic);
-            //TODO 异步进行所有设备的子Topic添加
-            response = BasicResponse.ok();
+            int failure = deviceTopicService.addTopic(deviceTemplateTopic);
+            response = failure == 0 ?
+                    BasicResponse.ok() :
+                    BasicResponse.error().message("模板Topic添加成功，但有" + failure + "个设备添加Topic失败");
         } else {
             response = BasicResponse.error().message(messageJoiner.toString());
         }

@@ -4,10 +4,8 @@ import com.github.javafaker.Faker;
 import edu.nju.se.yrd.iotconnmgmt.entity.DeviceTemplate;
 import edu.nju.se.yrd.iotconnmgmt.entity.DeviceTemplateTopic;
 import edu.nju.se.yrd.iotconnmgmt.entity.Protocol;
-import edu.nju.se.yrd.iotconnmgmt.protocol.IProtocol;
 import edu.nju.se.yrd.iotconnmgmt.repository.DeviceTemplateTopicRepository;
 import edu.nju.se.yrd.iotconnmgmt.repository.ProtocolRepository;
-import edu.nju.se.yrd.iotconnmgmt.serviceImpl.DeviceTemplateTopicServiceImpl;
 import edu.nju.se.yrd.iotconnmgmt.util.TopicTool;
 import edu.nju.se.yrd.iotconnmgmt.vo.BasicResponse;
 import edu.nju.se.yrd.iotconnmgmt.vo.CarryPayloadResponse;
@@ -38,7 +36,7 @@ class DeviceTemplateTopicServiceTest {
     @BeforeEach
     void setUp() {
         mqtt.setName("MQTT");
-        mqtt.setImplement(IProtocol.class);
+        mqtt.setImplement("com.example.MQTT");
         mqtt.setJarFile("mqtt.jar");
 
         templateTopicRepository = mock(DeviceTemplateTopicRepository.class);
@@ -46,8 +44,9 @@ class DeviceTemplateTopicServiceTest {
         protocolRepository = mock(ProtocolRepository.class);
         when(protocolRepository.findByName(mqtt.getName())).thenReturn(Optional.of(mqtt));
         when(protocolRepository.findByName(argThat(argument -> !argument.equals(mqtt.getName())))).thenReturn(Optional.empty());
-
-        service = new DeviceTemplateTopicServiceImpl(templateTopicRepository, protocolRepository);
+        DeviceTopicServiceImpl deviceTopicService = mock(DeviceTopicServiceImpl.class);
+        when(deviceTopicService.addTopic(any(DeviceTemplateTopic.class))).thenReturn(0);
+        service = new DeviceTemplateTopicServiceImpl(templateTopicRepository, protocolRepository, deviceTopicService);
     }
 
     @Test

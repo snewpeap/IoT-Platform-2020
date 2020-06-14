@@ -11,14 +11,16 @@ public class DeviceTemplateTopicVO {
     private String description;
     private Boolean outbound;
     private Boolean inbound;
+    private String protocol;
 
-    public DeviceTemplateTopicVO(Long id, String deviceTemplateName, String name, String description, Boolean outbound, Boolean inbound) {
+    public DeviceTemplateTopicVO(Long id, String deviceTemplateName, String name, String description, Boolean outbound, Boolean inbound, String protocol) {
         this.id = id;
         this.deviceTemplateName = deviceTemplateName;
         this.name = name;
         this.description = description;
         this.outbound = outbound;
         this.inbound = inbound;
+        this.protocol = protocol;
     }
 
     public DeviceTemplateTopicVO() {
@@ -32,7 +34,8 @@ public class DeviceTemplateTopicVO {
                 entity.getName(),
                 entity.getDescription(),
                 entity.getOutbound(),
-                entity.getInbound()
+                entity.getInbound(),
+                entity.getProtocol().getName()
         );
     }
 
@@ -82,6 +85,14 @@ public class DeviceTemplateTopicVO {
 
     public void setInbound(Boolean inbound) {
         this.inbound = inbound;
+    }
+
+    public String getProtocol() {
+        return protocol;
+    }
+
+    public void setProtocol(String protocol) {
+        this.protocol = protocol;
     }
 
     @Override

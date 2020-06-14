@@ -65,10 +65,10 @@ public class Message {
     }
 
     public enum DIRECTION {
-        UPSTREAM, DOWNSTREAM;
+        INBOUND, OUTBOUND
     }
 
     public enum STATUS {
-        SENDING, SENT, FAILED;
+        SENDING, SENT, FAILED
     }
 }

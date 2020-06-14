@@ -1,25 +1,26 @@
 package edu.nju.se.yrd.iotconnmgmt.serviceImpl;
 
-import edu.nju.se.yrd.iotconnmgmt.entity.DeviceTopic;
-import edu.nju.se.yrd.iotconnmgmt.entity.Message;
-import edu.nju.se.yrd.iotconnmgmt.entity.Protocol;
+import edu.nju.se.yrd.iotconnmgmt.entity.*;
+import edu.nju.se.yrd.iotconnmgmt.protocol.IProtocol;
 import edu.nju.se.yrd.iotconnmgmt.repository.DeviceTopicRepository;
 import edu.nju.se.yrd.iotconnmgmt.repository.MessageRepository;
 import edu.nju.se.yrd.iotconnmgmt.repository.ProtocolRepository;
 import edu.nju.se.yrd.iotconnmgmt.service.DeviceTopicService;
+import edu.nju.se.yrd.iotconnmgmt.service.ProtocolService;
 import edu.nju.se.yrd.iotconnmgmt.util.TopicTool;
 import edu.nju.se.yrd.iotconnmgmt.util.TopicValidator;
 import edu.nju.se.yrd.iotconnmgmt.vo.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
+import javax.annotation.PostConstruct;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import java.util.*;
-import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,13 +28,22 @@ public class DeviceTopicServiceImpl implements DeviceTopicService {
     private final DeviceTopicRepository deviceTopicRepository;
     private final ProtocolRepository protocolRepository;
     private final MessageRepository messageRepository;
+    private final ProtocolService protocolService;
+    @Autowired
+    private AsyncMessageSender asyncMessageSender;
 
     @Autowired
     public DeviceTopicServiceImpl(DeviceTopicRepository deviceTopicRepository, ProtocolRepository protocolRepository,
-                                  MessageRepository messageRepository) {
+                                  MessageRepository messageRepository, ProtocolService protocolService) {
         this.deviceTopicRepository = deviceTopicRepository;
         this.protocolRepository = protocolRepository;
         this.messageRepository = messageRepository;
+        this.protocolService = protocolService;
+    }
+
+    @PostConstruct
+    void postConstruct() {
+        protocolService.register(this);
     }
 
     @Override
@@ -83,12 +93,43 @@ public class DeviceTopicServiceImpl implements DeviceTopicService {
             deviceTopic.setParent(null); //自定义Topic没有模板
             deviceTopic.setName(topic);
             optionalProtocol.ifPresent(deviceTopic::setProtocol);
-            deviceTopicRepository.save(deviceTopic);
-            response = BasicResponse.ok();
+            response = addTopic(deviceTopic) ? BasicResponse.ok() : BasicResponse.error().message("添加Topic时出现问题");
         } else {
             response = BasicResponse.error().message(messageJoiner.toString());
         }
         return response;
+    }
+
+    @Override
+    public int addTopic(DeviceTemplateTopic templateTopic) {
+        int failure = 0;
+        List<Device> distinctDevice = deviceTopicRepository.getDistinctDevice(templateTopic.getHost().getId());
+        for (Device device : distinctDevice) {
+            DeviceTopic deviceTopic = new DeviceTopic();
+            deviceTopic.setName(TopicTool.generateTopicFromTemplate(device.getId(), templateTopic.getName()));
+            deviceTopic.setHost(device);
+            deviceTopic.setParent(templateTopic);
+            deviceTopic.setDescription("Auto generated from template topic.");
+            deviceTopic.setInbound(templateTopic.getInbound());
+            deviceTopic.setOutbound(templateTopic.getOutbound());
+            deviceTopic.setProtocol(templateTopic.getProtocol());
+            if (!addTopic(deviceTopic)) {
+                failure++;
+            }
+        }
+        return failure;
+    }
+
+    private boolean addTopic(DeviceTopic deviceTopic) {
+        try {
+            if (protocolService.getProtocolInstance(deviceTopic.getProtocol().getName()).subscribe(deviceTopic.getName())) {
+                deviceTopicRepository.save(deviceTopic);
+                return true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     @Override
@@ -97,9 +138,24 @@ public class DeviceTopicServiceImpl implements DeviceTopicService {
     }
 
     @Override
-    @Async
-    public Future<CarryPayloadResponse<String>> sendMessage(Long topicId, String message, boolean async) {
-        return null;
+    public BasicResponse sendMessage(Long topicId, String message) {
+        Assert.notNull(topicId, "TopicId不能为空");
+        Assert.hasText(message, "不能发送空白消息");
+
+        Optional<DeviceTopic> topicOptional = deviceTopicRepository.findById(topicId);
+        if (topicOptional.isPresent()) {
+            DeviceTopic topic = topicOptional.get();
+            if (!topic.getInbound()) {
+                return BasicResponse.error().message("非出向Topic，不能发送消息");
+            }
+            Assert.notNull(topic.getProtocol(), "Topic居然没有Protocol");
+            IProtocol protocolInstance = protocolService.getProtocolInstance(topic.getProtocol().getName());
+            if (protocolInstance == null) {
+                return BasicResponse.error().message("该协议暂不可用");
+            }
+            asyncMessageSender.send(protocolInstance, topic, message);
+        }
+        return BasicResponse.ok();
     }
 
     @Override
@@ -108,5 +164,45 @@ public class DeviceTopicServiceImpl implements DeviceTopicService {
         return CarryPayloadResponse
                 .ok(messageRepository.getByTopic_IdOrderByTimestampDesc(topicId)
                         .stream().map(MessageVO::convertFromEntity).collect(Collectors.toList()));
+    }
+
+    @Override
+    public void update(Observable o, Object arg) {
+        String[] received = (String[]) arg;
+        String topic = received[0];
+        String message = received[1];
+
+        deviceTopicRepository.getByName(topic).ifPresent(topicEntity -> {
+            Message messageEntity = new Message();
+            messageEntity.setTopic(topicEntity);
+            messageEntity.setContent(message);
+            messageEntity.setDirection(Message.DIRECTION.INBOUND);
+            messageEntity.setTimestamp(System.currentTimeMillis());
+            messageRepository.save(messageEntity);
+        });
+    }
+
+    @Component
+    class AsyncMessageSender {
+        @Async
+        void send(IProtocol protocol, DeviceTopic topic, String message) {
+            Message messageEntity = new Message();
+            messageEntity.setTopic(topic);
+            messageEntity.setContent(message);
+            messageEntity.setStatus(Message.STATUS.SENDING);
+            messageEntity.setDirection(Message.DIRECTION.OUTBOUND);
+            messageEntity.setTimestamp(System.currentTimeMillis());
+            messageRepository.save(messageEntity);
+
+            try {
+                messageEntity.setStatus(protocol.send(topic.getName(), message) ? Message.STATUS.SENT : Message.STATUS.FAILED);
+            } catch (Exception e) {
+                e.printStackTrace();
+                messageEntity.setStatus(Message.STATUS.FAILED);
+            } finally {
+                messageEntity.setTimestamp(System.currentTimeMillis());
+                messageRepository.save(messageEntity);
+            }
+        }
     }
 }

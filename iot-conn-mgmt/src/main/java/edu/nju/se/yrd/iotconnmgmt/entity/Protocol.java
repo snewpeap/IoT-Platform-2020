@@ -1,7 +1,5 @@
 package edu.nju.se.yrd.iotconnmgmt.entity;
 
-import edu.nju.se.yrd.iotconnmgmt.protocol.IProtocol;
-
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
@@ -9,7 +7,7 @@ import javax.persistence.Id;
 public class Protocol {
     @Id
     private String name;
-    private Class<IProtocol> implement;
+    private String implement;
     private String jarFile;
 
     public String getName() {
@@ -20,11 +18,11 @@ public class Protocol {
         this.name = name;
     }
 
-    public Class<IProtocol> getImplement() {
+    public String getImplement() {
         return implement;
     }
 
-    public void setImplement(Class<IProtocol> implement) {
+    public void setImplement(String implement) {
         this.implement = implement;
     }
 

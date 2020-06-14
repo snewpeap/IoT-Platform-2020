@@ -1,5 +1,6 @@
 package edu.nju.se.yrd.iotconnmgmt.service;
 
+import edu.nju.se.yrd.iotconnmgmt.protocol.IProtocol;
 import edu.nju.se.yrd.iotconnmgmt.vo.BasicResponse;
 import edu.nju.se.yrd.iotconnmgmt.vo.CarryPayloadResponse;
 
@@ -7,6 +8,8 @@ import java.io.File;
 import java.util.List;
 
 public interface ProtocolService {
+    IProtocol getProtocolInstance(String name);
+
     /**
      * 获取平台当前支持的协议
      *
@@ -21,4 +24,11 @@ public interface ProtocolService {
      * @return 流程结果
      */
     BasicResponse newProtocol(File file);
+
+    /**
+     * 注册观察者
+     *
+     * @param deviceTopicService 作为DeviceTopicService的观察者
+     */
+    void register(DeviceTopicService deviceTopicService);
 }
