@@ -12,11 +12,11 @@ public class DeviceTopicForm {
     @TopicType
     private String name;
     @NotNull(message = "Topic描述不能为空")
-    private String description;
+    private String description = "";
     @NotNull(message = "出向标识不能为空")
-    private Boolean outbound;
+    private Boolean outbound = false;
     @NotNull(message = "入向标识不能为空")
-    private Boolean inbound;
+    private Boolean inbound = false;
     @NotNull(message = "协议不能为空")
     private String protocol;
 

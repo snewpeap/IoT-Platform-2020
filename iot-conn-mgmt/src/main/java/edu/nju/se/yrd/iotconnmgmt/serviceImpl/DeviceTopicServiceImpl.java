@@ -1,5 +1,6 @@
 package edu.nju.se.yrd.iotconnmgmt.serviceImpl;
 
+import com.github.javafaker.Faker;
 import edu.nju.se.yrd.iotconnmgmt.entity.*;
 import edu.nju.se.yrd.iotconnmgmt.protocol.IProtocol;
 import edu.nju.se.yrd.iotconnmgmt.repository.DeviceTopicRepository;
@@ -65,7 +66,8 @@ public class DeviceTopicServiceImpl implements DeviceTopicService {
         Optional<Protocol> optionalProtocol = Optional.empty();
         StringJoiner messageJoiner = new StringJoiner("\n");
         if (validate.isEmpty()) {
-            TopicValidator.isValid(form.getName(), form.getInbound(), form.getOutbound(), messageJoiner);
+            String name = TopicTool.startWithSlash(form.getName());
+            TopicValidator.isValid(name, form.getInbound(), form.getOutbound(), messageJoiner);
 
             optionalProtocol = protocolRepository.findByName(form.getProtocol());
             if (!optionalProtocol.isPresent()) {
@@ -78,7 +80,7 @@ public class DeviceTopicServiceImpl implements DeviceTopicService {
             } else {
                 String deviceTemplateId = checkHost.get().getHost().getTemplate().getId();
                 String deviceId = checkHost.get().getHost().getId();
-                topic = TopicTool.generateName(deviceTemplateId, deviceId, form.getName());
+                topic = TopicTool.generateName(deviceTemplateId, deviceId, name);
                 if (deviceTopicRepository.existsByName(topic)) {
                     messageJoiner.add("已经存在的Topic");
                 }
@@ -177,6 +179,7 @@ public class DeviceTopicServiceImpl implements DeviceTopicService {
             messageEntity.setTopic(topicEntity);
             messageEntity.setContent(message);
             messageEntity.setDirection(Message.DIRECTION.INBOUND);
+            messageEntity.setStatus(Message.STATUS.RECEIVED);
             messageEntity.setTimestamp(System.currentTimeMillis());
             messageRepository.save(messageEntity);
         });

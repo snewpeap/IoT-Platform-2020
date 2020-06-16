@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>连接管理</title>
+    <script src="request.js"></script>
+    <script src="https://lib.sinaapp.com/js/jquery/2.0.2/jquery-2.0.2.min.js"></script>
+    <script>
+        $.fn.serializeFormToJson = function(){
+            const arr = $(this).serializeArray();
+            let param = {};
+            $.each(arr,function(i,obj) {
+                param[obj.name] = obj.value;
+            })
+            return param;
+        }
+
+        function submitTopic() {
+            const url = "http://localhost:8080/api/topic/template"
+            const data = $("#topic-form").serializeFormToJson()
+            console.log(data)
+            post(url, data, function (response) {
+                if (response.success) {
+                    self.location.href = "mainPage.html"
+                } else {
+                    $("body").append($("<p></p>").text(response.message));
+                }
+            })
+        }
+    </script>
+</head>
+<body>
+    <h2>添加模板Topic</h2>
+    <form name="topic-form" id="topic-form">
+        设备模板Id：<input name="deviceTemplateId" type="text" value="16ca8851-2d1a-4f8f-a84a-88566dc159dc" readonly
+                          style="width: 250px"/>
+        <br/><br/>
+        名称：<input name="name" type="text"/>
+        <br/><br/>
+        描述：<textarea name="description" cols="20" rows="4"></textarea>
+        <br/><br/>
+        设备可订阅：<input name="inbound" type="checkbox" value="true"/>
+        设备可发布：<input name="outbound" type="checkbox" value="true"/>
+        <br/><br/>
+        协议：<select name="protocol" id="protocol-select">
+        </select>
+        <br/><br/>
+        <input type="button" value="提交" onclick="submitTopic()">
+    </form>
+
+    <script>
+        $(document).ready(function () {
+            const url = "http://localhost:8080/api/topic/protocol"
+            const onSuccess = function (response) {
+                if (response.success) {
+                    response.payload.forEach(protocol => {
+                        const option = $("<option></option>").attr("value", protocol).html(protocol)
+                        $("#protocol-select").append(option)
+                    })
+                } else {
+                    $("body").append($("<p></p>").text(response.message));
+                }
+            }
+            get(url, onSuccess)
+        })
+    </script>
+</body>
+</html>

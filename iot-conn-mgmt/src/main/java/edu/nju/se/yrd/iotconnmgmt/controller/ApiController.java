@@ -60,12 +60,12 @@ public class ApiController {
 //        return null;
 //    }
 
-    @PostMapping("device/{topicId}/message")
+    @PostMapping("/device/{topicId}/message")
     public BasicResponse manuallySendMessage(@PathVariable Long topicId, @RequestBody String message) {
         return deviceTopicService.sendMessage(topicId, message);
     }
 
-    @GetMapping("device/{topicId}/message")
+    @GetMapping("/device/{topicId}/message")
     public CarryPayloadResponse<List<MessageVO>> getMessages(@PathVariable Long topicId) {
         return deviceTopicService.getMessages(topicId);
     }

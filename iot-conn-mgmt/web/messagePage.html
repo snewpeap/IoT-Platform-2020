@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>连接管理</title>
+    <script src="https://lib.sinaapp.com/js/jquery/2.0.2/jquery-2.0.2.min.js"></script>
+    <script src="request.js"></script>
+</head>
+<body>
+    <a href="#" onclick="history.back()">返回</a>
+    <h2>历史消息列表</h2>
+    <table id="messages-table" border="1" cellpadding="5">
+        <tr>
+            <th>时间</th>
+            <th>内容</th>
+            <th>方向（相对于平台）</th>
+            <th>状态</th>
+        </tr>
+    </table>
+
+    <script>
+        $(document).ready(function () {
+            const topicId = decodeURI(window.location.href.split("=")[1])
+            const url = "http://localhost:8080/api/topic/device/" + topicId + "/message"
+            const onSuccess = function (response) {
+                if (response.success) {
+                    response.payload.forEach(function (message) {
+                        const time = "<td>" + message['time'] + "</td>"
+                        const content = "<td>" + message['content'] + "</td>"
+                        const direction = "<td>" + message['direction'] + "</td>"
+                        const status = "<td>" + message['status'] + "</td>"
+                        const row = "<tr>" + time + content + direction + status + "</tr>"
+                        $("#messages-table").append(row)
+                    })
+                } else {
+                    $("body").append($("<p></p>").text(response.message));
+                }
+            }
+            get(url, onSuccess)
+        })
+    </script>
+</body>
+</html>

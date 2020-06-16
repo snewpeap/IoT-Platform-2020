@@ -11,14 +11,16 @@ public class DeviceTopicVO {
     private String description;
     private Boolean outbound;
     private Boolean inbound;
+    private String protocol;
 
-    public DeviceTopicVO(Long id, String deviceName, String name, String description, Boolean outbound, Boolean inbound) {
+    public DeviceTopicVO(Long id, String deviceName, String name, String description, Boolean outbound, Boolean inbound, String protocol) {
         this.id = id;
         this.deviceName = deviceName;
         this.name = name;
         this.description = description;
         this.outbound = outbound;
         this.inbound = inbound;
+        this.protocol = protocol;
     }
 
     public DeviceTopicVO() {
@@ -32,7 +34,8 @@ public class DeviceTopicVO {
                 entity.getName(),
                 entity.getDescription(),
                 entity.getOutbound(),
-                entity.getInbound()
+                entity.getInbound(),
+                entity.getProtocol().getName()
         );
     }
 
@@ -84,6 +87,14 @@ public class DeviceTopicVO {
         this.inbound = inbound;
     }
 
+    public String getProtocol() {
+        return protocol;
+    }
+
+    public void setProtocol(String protocol) {
+        this.protocol = protocol;
+    }
+
     @Override
     public String toString() {
         return new StringJoiner(", ", DeviceTopicVO.class.getSimpleName() + "[", "]")
@@ -93,6 +104,7 @@ public class DeviceTopicVO {
                 .add("description='" + description + "'")
                 .add("outbound=" + outbound)
                 .add("inbound=" + inbound)
+                .add("protocol='" + protocol + "'")
                 .toString();
     }
 }

@@ -1,6 +1,10 @@
 package edu.nju.se.yrd.iotconnmgmt.util;
 
 public class TopicTool {
+    public static String startWithSlash(String userInput) {
+        return !userInput.startsWith("/") ? "/" + userInput : userInput;
+    }
+
     public static String generateNameFromUserInput(String inputName, String deviceTemplateId) {
         return "/" + deviceTemplateId + "/${deviceId}/user" + inputName;
     }

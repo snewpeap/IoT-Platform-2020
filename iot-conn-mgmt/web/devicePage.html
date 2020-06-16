@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>连接管理</title>
+    <script src="https://lib.sinaapp.com/js/jquery/2.0.2/jquery-2.0.2.min.js"></script>
+    <script src="request.js"></script>
+</head>
+<body>
+<table>
+    <tr>
+        <td><a href="mainPage.html">设备模板Topic</a></td>
+        <td>设备Topic</td>
+        <td><a href="protocolPage.html">协议</a></td>
+    </tr>
+</table>
+<hr/>
+<h2>设备Topic</h2><a href="addTopicPage.html">添加Topic</a>
+
+<table id="topics-table" border="1" cellpadding="5">
+    <tr>
+        <th>设备</th>
+        <th>名称</th>
+        <th>描述</th>
+        <th>设备可发布</th>
+        <th>设备可订阅</th>
+        <th>协议</th>
+        <th></th>
+    </tr>
+</table>
+
+<script>
+    $(document).ready(function () {
+        const url = "http://localhost:8080/api/topic/device/33fa8425-0d6a-42b1-931c-30197bbde6ae"
+        let onSuccess = function (response) {
+            if (response.success) {
+                response.payload.forEach(function (topic) {
+                    const deviceName = "<td>" + topic['deviceName'] + "</td>"
+                    const name = "<td>" + topic['name'] + "</td>"
+                    const description = "<td>" + topic['description'] + "</td>"
+                    const inbound = topic['inbound'] === true ? "<td>√</td>" : "<td>×</td>"
+                    const outbound = topic['outbound'] === true ? "<td>√</td>" : "<td>×</td>"
+                    const protocol = "<td>" + topic['protocol'] + "</td>"
+                    const messages = "<td><a href=messagePage.html?topicId=" + topic['id'] + ">历史消息列表</a>"
+                    const row = "<tr>" + deviceName + name +
+                        description + inbound + outbound + protocol + messages + "</tr>"
+                    $("#topics-table").append(row)
+                })
+            } else {
+                $("body").append($("<p></p>").text(response.message));
+            }
+        }
+        get(url, onSuccess)
+    })
+</script>
+</body>
+</html>

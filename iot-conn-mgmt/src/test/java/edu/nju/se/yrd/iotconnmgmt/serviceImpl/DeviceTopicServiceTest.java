@@ -236,7 +236,10 @@ class DeviceTopicServiceTest {
             message.setContent(faker.shakespeare().hamletQuote());
             message.setTopic(dt);
             message.setDirection(Message.DIRECTION.values()[RandomUtils.nextInt(0, 2)]);
-            message.setStatus(Message.STATUS.values()[RandomUtils.nextInt(0, 3)]);
+            message.setStatus(message.getDirection() == Message.DIRECTION.INBOUND ?
+                    Message.STATUS.RECEIVED :
+                    Message.STATUS.values()[RandomUtils.nextInt(0, 3)]
+            );
             messages.add(message);
         }
         return messages;

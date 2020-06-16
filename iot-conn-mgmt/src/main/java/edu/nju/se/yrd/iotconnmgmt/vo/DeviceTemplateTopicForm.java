@@ -12,11 +12,11 @@ public class DeviceTemplateTopicForm {
     @TopicType
     private String name;
     @NotNull(message = "Topic描述不能为空")
-    private String description;
+    private String description = "";
     @NotNull(message = "出向标识不能为空")
-    private Boolean outbound;
+    private Boolean outbound = false;
     @NotNull(message = "入向标识不能为空")
-    private Boolean inbound;
+    private Boolean inbound = false;
     @NotNull(message = "协议不能为空")
     private String protocol;
 
@@ -70,7 +70,7 @@ public class DeviceTemplateTopicForm {
 
     /* 转换后的Entity没有处理protocol信息，需要在后续处理 */
     public DeviceTemplateTopic convertToEntity() {
-        DeviceTemplate deviceTemplate = new DeviceTemplate(deviceTemplateId, deviceTemplateId);
+        DeviceTemplate deviceTemplate = new DeviceTemplate(deviceTemplateId, "No.1 Product");
         return new DeviceTemplateTopic(deviceTemplate, name, description, outbound, inbound);
     }
 }

@@ -11,9 +11,9 @@ public class Message {
     private String content;
     @ManyToOne
     private DeviceTopic topic;
-    @Enumerated
+    @Enumerated(EnumType.STRING)
     private DIRECTION direction;
-    @Enumerated
+    @Enumerated(EnumType.STRING)
     private STATUS status;
 
     public String getId() {
@@ -69,6 +69,6 @@ public class Message {
     }
 
     public enum STATUS {
-        SENDING, SENT, FAILED
+        SENDING, SENT, FAILED, RECEIVED
     }
 }
