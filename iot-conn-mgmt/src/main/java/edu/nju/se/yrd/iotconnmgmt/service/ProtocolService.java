@@ -3,12 +3,15 @@ package edu.nju.se.yrd.iotconnmgmt.service;
 import edu.nju.se.yrd.iotconnmgmt.protocol.IProtocol;
 import edu.nju.se.yrd.iotconnmgmt.vo.BasicResponse;
 import edu.nju.se.yrd.iotconnmgmt.vo.CarryPayloadResponse;
+import edu.nju.se.yrd.iotconnmgmt.vo.ProtocolVO;
 
 import java.io.File;
 import java.util.List;
 
 public interface ProtocolService {
     IProtocol getProtocolInstance(String name);
+
+    CarryPayloadResponse<List<ProtocolVO>> getDetailProtocols();
 
     /**
      * 获取平台当前支持的协议

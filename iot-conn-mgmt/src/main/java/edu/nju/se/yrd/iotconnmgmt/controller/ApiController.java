@@ -70,6 +70,11 @@ public class ApiController {
         return deviceTopicService.getMessages(topicId);
     }
 
+    @GetMapping("/protocol/detail")
+    public CarryPayloadResponse<List<ProtocolVO>> getDetailProtocols() {
+        return protocolService.getDetailProtocols();
+    }
+
     @GetMapping("/protocol")
     public CarryPayloadResponse<List<String>> getProtocols() {
         return protocolService.getProtocols();

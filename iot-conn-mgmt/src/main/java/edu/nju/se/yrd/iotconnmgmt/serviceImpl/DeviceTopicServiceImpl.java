@@ -1,6 +1,5 @@
 package edu.nju.se.yrd.iotconnmgmt.serviceImpl;
 
-import com.github.javafaker.Faker;
 import edu.nju.se.yrd.iotconnmgmt.entity.*;
 import edu.nju.se.yrd.iotconnmgmt.protocol.IProtocol;
 import edu.nju.se.yrd.iotconnmgmt.repository.DeviceTopicRepository;
@@ -11,6 +10,7 @@ import edu.nju.se.yrd.iotconnmgmt.service.ProtocolService;
 import edu.nju.se.yrd.iotconnmgmt.util.TopicTool;
 import edu.nju.se.yrd.iotconnmgmt.util.TopicValidator;
 import edu.nju.se.yrd.iotconnmgmt.vo.*;
+import org.eclipse.paho.client.mqttv3.MqttTopic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -45,6 +45,13 @@ public class DeviceTopicServiceImpl implements DeviceTopicService {
     @PostConstruct
     void postConstruct() {
         protocolService.register(this);
+        deviceTopicRepository.findAll().forEach(topic -> {
+            try {
+                protocolService.getProtocolInstance(topic.getProtocol().getName()).subscribe(topic.getName());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     @Override
@@ -174,15 +181,17 @@ public class DeviceTopicServiceImpl implements DeviceTopicService {
         String topic = received[0];
         String message = received[1];
 
-        deviceTopicRepository.getByName(topic).ifPresent(topicEntity -> {
-            Message messageEntity = new Message();
-            messageEntity.setTopic(topicEntity);
-            messageEntity.setContent(message);
-            messageEntity.setDirection(Message.DIRECTION.INBOUND);
-            messageEntity.setStatus(Message.STATUS.RECEIVED);
-            messageEntity.setTimestamp(System.currentTimeMillis());
-            messageRepository.save(messageEntity);
-        });
+        for (DeviceTopic deviceTopic : deviceTopicRepository.findAll()) {
+            if (deviceTopic.getName().equals(topic) || MqttTopic.isMatched(deviceTopic.getName(), topic)) {
+                Message messageEntity = new Message();
+                messageEntity.setTopic(deviceTopic);
+                messageEntity.setContent(message);
+                messageEntity.setDirection(Message.DIRECTION.INBOUND);
+                messageEntity.setStatus(Message.STATUS.RECEIVED);
+                messageEntity.setTimestamp(System.currentTimeMillis());
+                messageRepository.save(messageEntity);
+            }
+        }
     }
 
     @Component

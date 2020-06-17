@@ -16,3 +16,13 @@ function post(url, data, onSuccess) {
         success: onSuccess
     })
 }
+
+function postText(url, text, onSuccess) {
+    $.ajax({
+        url: url,
+        data: text,
+        contentType: "text/plain",
+        type: "POST",
+        success: onSuccess
+    })
+}

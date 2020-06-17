@@ -3,8 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <title>连接管理</title>
+    <script src="https://lib.sinaapp.com/js/jquery/2.0.2/jquery-2.0.2.min.js"></script>
+    <script src="request.js"></script>
+    <script>
+        function upload() {
+            let formData = new FormData()
+            formData.append("multipartFile", $("input#file")[0].files[0])
+            $.ajax({
+                url: "http://localhost:8080/api/topic/protocol",
+                type: "POST",
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function (response) {
+                    if (response.success) {
+                        window.location.reload()
+                    } else {
+                        $(a).after($("<p style='color: red'></p>").text(response.message))
+                    }
+                }
+            })
+        }
+    </script>
 </head>
 <body>
+<table>
+    <tr>
+        <td><a href="mainPage.html">设备模板Topic</a></td>
+        <td><a href="devicePage.html">设备Topic</a></td>
+        <td>协议</td>
+    </tr>
+</table>
 
+<hr/>
+<h2>协议</h2>
+
+<table id="protocols-table" border="1" cellpadding="5">
+    <tr>
+        <th>协议名</th>
+        <th>实现类</th>
+        <th>库文件位置</th>
+    </tr>
+</table>
+<br/>
+<form enctype="multipart/form-data">
+    <input id="file" type="file" value="">
+    <input type="button" value="上传" onclick="upload()">
+</form>
+
+    <script>
+        $(document).ready(function () {
+            const url = "http://localhost:8080/api/topic/protocol/detail"
+            const onSuccess = function (response) {
+                if (response.success) {
+                    response.payload.forEach(protocol => {
+                        const name = "<td>" + protocol['name'] + "</td>"
+                        const implement = "<td>" + protocol['implement'] + "</td>"
+                        const location = "<td>" + protocol['location'] + "</td>"
+                        const row = "<tr>" + name + implement + location + "</tr>"
+                        $("#protocols-table").append(row)
+                    })
+                } else {
+                    $("body").append($("<p></p>").text(response.message));
+                }
+            }
+            get(url, onSuccess)
+        })
+    </script>
 </body>
 </html>

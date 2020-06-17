@@ -70,7 +70,7 @@ public class DeviceTopicForm {
 
     /* 转换后的Entity没有处理protocol和parent信息，需要在后续处理 */
     public DeviceTopic convertToEntity() {
-        Device device = new Device(deviceId, deviceId);
+        Device device = new Device(deviceId, "Device-01");
         return new DeviceTopic(device, name, description, outbound, inbound);
     }
 }

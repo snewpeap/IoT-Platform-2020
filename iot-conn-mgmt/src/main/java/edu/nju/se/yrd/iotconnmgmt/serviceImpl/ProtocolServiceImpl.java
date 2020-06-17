@@ -9,6 +9,7 @@ import edu.nju.se.yrd.iotconnmgmt.service.ProtocolService;
 import edu.nju.se.yrd.iotconnmgmt.util.SimpleClassLoader;
 import edu.nju.se.yrd.iotconnmgmt.vo.BasicResponse;
 import edu.nju.se.yrd.iotconnmgmt.vo.CarryPayloadResponse;
+import edu.nju.se.yrd.iotconnmgmt.vo.ProtocolVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -37,11 +38,6 @@ public class ProtocolServiceImpl implements ProtocolService {
 
     @PostConstruct
     void postConstruct() {
-        Protocol mqtt = new Protocol();
-        mqtt.setName("MQTT");
-        mqtt.setImplement(ProtocolMQTTImpl.class.getName());
-        mqtt.setJarFile("");
-        protocolRepository.saveAndFlush(mqtt);
 
         protocolRepository.findAll().forEach(protocol -> {
             try {
@@ -69,6 +65,11 @@ public class ProtocolServiceImpl implements ProtocolService {
     }
 
     @Override
+    public CarryPayloadResponse<List<ProtocolVO>> getDetailProtocols() {
+        return CarryPayloadResponse.ok(protocolRepository.findAll().stream().map(ProtocolVO::convertFromEntity).collect(Collectors.toList()));
+    }
+
+    @Override
     public CarryPayloadResponse<List<String>> getProtocols() {
         return CarryPayloadResponse.ok(protocolRepository.findAll().stream().map(Protocol::getName).collect(Collectors.toList()));
     }
@@ -77,46 +78,55 @@ public class ProtocolServiceImpl implements ProtocolService {
     public BasicResponse newProtocol(File file) {
         JarFile uploadFile;
         try {
-            uploadFile = new JarFile(file);
+            uploadFile = new JarFile(file, false);
         } catch (IOException e) {
             return BasicResponse.error().message("不是一个有效的jar文件");
         }
-        Manifest manifest;
         try {
-            manifest = uploadFile.getManifest();
-        } catch (IOException e) {
-            return BasicResponse.error().message("读取manifest文件时出现错误，请检查manifest文件正确性");
-        }
-        String targetClassName = manifest.getAttributes("Protocol-Implement-Class").getValue("Protocol-Implement-Class");
-        Assert.notNull(targetClassName, "未在manifest中定义Protocol-Implement-Class属性");
+            Manifest manifest;
+            try {
+                manifest = uploadFile.getManifest();
+            } catch (IOException e) {
+                return BasicResponse.error().message("读取manifest文件时出现错误，请检查manifest文件正确性");
+            }
+            String targetClassName = manifest.getMainAttributes().getValue("Protocol-Implement-Class");
+            Assert.notNull(targetClassName, "未在manifest中定义Protocol-Implement-Class属性");
 
-        Class<IProtocol> protocolClass;
-        try {
-            protocolClass = getProtocol(uploadFile, targetClassName);
-        } catch (IOException ioException) {
-            return BasicResponse.error().message("读取文件异常");
+            Class<IProtocol> protocolClass;
+            try {
+                protocolClass = getProtocol(uploadFile, targetClassName);
+            } catch (IOException ioException) {
+                return BasicResponse.error().message("读取文件异常");
+            } catch (Exception e) {
+                return BasicResponse.error().message(e.getMessage());
+            }
+            Assert.notNull(protocolClass, targetClassName + "未实现接口IProtocol");
+            IProtocol protocol;
+            try {
+                protocol = protocolClass.newInstance();
+            } catch (InstantiationException | IllegalAccessException e) {
+                return BasicResponse.error().message("服务器异常");
+            }
+            String protocolName = protocol.getProtocolName();
+            Assert.notNull(protocolName, "协议名不能为空");
+            IProtocol iProtocol = protocolMap.get(protocolName);
+            if (iProtocol != null) {
+                return BasicResponse.error().message(protocolName + "已经有实现类" + iProtocol.getClass().getName());
+            }
+            Protocol newProtocol = new Protocol();
+            newProtocol.setName(protocolName);
+            newProtocol.setImplement(targetClassName);
+            newProtocol.setJarFile(uploadFile.getName());
+            protocolRepository.save(newProtocol);
+            protocolMap.put(protocolName, protocol);
         } catch (Exception e) {
-            return BasicResponse.error().message(e.getMessage());
+            try {
+                uploadFile.close();
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+                return BasicResponse.error().message("服务器异常");
+            }
         }
-        Assert.notNull(protocolClass, targetClassName + "未实现接口IProtocol");
-        IProtocol protocol;
-        try {
-            protocol = protocolClass.newInstance();
-        } catch (InstantiationException | IllegalAccessException e) {
-            return BasicResponse.error().message("服务器异常");
-        }
-        String protocolName = protocol.getProtocolName();
-        Assert.notNull(protocolName, "协议名不能为空");
-        IProtocol iProtocol = protocolMap.get(protocolName);
-        if (iProtocol != null) {
-            return BasicResponse.error().message(protocolName + "已经有实现类" + iProtocol.getClass().getName());
-        }
-        Protocol newProtocol = new Protocol();
-        newProtocol.setName(protocolName);
-        newProtocol.setImplement(targetClassName);
-        newProtocol.setJarFile(uploadFile.getName());
-        protocolRepository.save(newProtocol);
-        protocolMap.put(protocolName, protocol);
 
         return BasicResponse.ok();
     }

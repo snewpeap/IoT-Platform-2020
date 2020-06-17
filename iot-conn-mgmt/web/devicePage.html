@@ -5,6 +5,32 @@
     <title>连接管理</title>
     <script src="https://lib.sinaapp.com/js/jquery/2.0.2/jquery-2.0.2.min.js"></script>
     <script src="request.js"></script>
+    <script>
+        function sendMessage(a) {
+            let textArea = $(a).prev()
+            const message = textArea.val()
+            const topicId = textArea.attr("id").split("-")[1]
+            const url = "http://localhost:8080/api/topic/device/" + topicId + "/message"
+            const onSuccess = function (response) {
+                if (response.success) {
+                    textArea.parent().remove()
+                    window.location.href = "messagePage.html?topicId=" + topicId
+                } else {
+                    $(a).after($("<p style='color: red'></p>").text(response.message))
+                }
+            }
+            postText(url, message, onSuccess)
+        }
+        function editMessage(a) {
+            let obj = $(a)
+            let tr = obj.parent().parent()
+            const topicId = tr.attr("id").split("-")[1]
+            if ($("textarea#text-" + topicId).length <= 0) {
+                const editor = "<tr><td colspan='7'>输入消息：<textarea id=text-" + topicId + " rows='4' cols='100'/><input type='button' value='发送' onclick='sendMessage(this)'></td></tr>"
+                tr.after(editor)
+            }
+        }
+    </script>
 </head>
 <body>
 <table>
@@ -41,8 +67,9 @@
                     const inbound = topic['inbound'] === true ? "<td>√</td>" : "<td>×</td>"
                     const outbound = topic['outbound'] === true ? "<td>√</td>" : "<td>×</td>"
                     const protocol = "<td>" + topic['protocol'] + "</td>"
-                    const messages = "<td><a href=messagePage.html?topicId=" + topic['id'] + ">历史消息列表</a>"
-                    const row = "<tr>" + deviceName + name +
+                    const messages = "<td><a href=messagePage.html?topicId=" + topic['id'] + ">消息列表</a>"
+                        + "<br/><a href='#' onclick='editMessage(this)'>发送消息</a></td>"
+                    const row = "<tr id=topic-"+ topic['id'] + ">" + deviceName + name +
                         description + inbound + outbound + protocol + messages + "</tr>"
                     $("#topics-table").append(row)
                 })
